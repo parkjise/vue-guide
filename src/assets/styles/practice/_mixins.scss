@@ -1,0 +1,306 @@
+// [Practice Mixins] 실무 컴포넌트의 반복되는 CSS 선언을 묶은 모듈입니다.
+// 가져오기: @use '@/assets/styles/practice/mixins' as mix;
+// 사용 예: .panel { @include mix.surface; @include mix.stack(16px); }
+// Practice 전체를 가져온 경우에는 ui.stack(), ui.surface()처럼 같은 이름으로 사용합니다.
+// 기본 간격·반경은 tokens, 간격 계산은 functions 모듈에서 가져옵니다.
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:list';
+@use '../mixins' as common;
+@use 'tokens';
+@use 'functions' as fn;
+
+// stack($gap): 자식 요소를 세로로 배치합니다. 기본 간격은 16px입니다.
+// 예: .form { @include mix.stack(24px); }
+// 사용처: 폼 필드 묶음, 세로 카드 콘텐츠. 자식 margin 대신 gap으로 간격을 통일합니다.
+@mixin stack($gap: fn.space(4)) {
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+}
+
+// cluster($gap, $align): 가로 배치하며 공간이 부족하면 다음 줄로 넘깁니다.
+// 기본값: $gap = 12px, $align = center. align-items에 유효한 정렬 값을 전달하세요.
+// 예: .toolbar { @include mix.cluster($gap: 8px, $align: flex-start); }
+// 사용처: 툴바, 필터, 태그 그룹. 한 줄 고정이 필요한 레이아웃에는 별도 설정이 필요합니다.
+@mixin cluster($gap: fn.space(3), $align: center) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: $align;
+  gap: $gap;
+}
+
+// surface($padding, $radius): 공통 카드의 패딩·배경·테두리·반경·그림자입니다.
+// 기본값: 패딩 20px, 반경 12px. 이름 있는 인자로 필요한 값만 바꿀 수 있습니다.
+// 예: .card { @include mix.surface($padding: 24px) { border-left: 3px solid var(--primary); } }
+// @content: 호출하는 쪽의 추가 스타일을 이 위치에 삽입합니다. 블록 없이 호출해도 됩니다.
+// CSS 변수는 전역 main.scss에서 정의하므로 앱 진입점에서 main.scss를 불러오세요.
+@mixin surface($padding: fn.space(5), $radius: tokens.$radius) {
+  padding: $padding;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: $radius;
+  box-shadow: var(--shadow);
+  @content;
+}
+
+// respond($name): 뷰포트 너비를 기준으로 모바일 우선 미디어 쿼리를 만듭니다.
+// $name: tokens.$breakpoints의 키(sm / md / lg). 알 수 없는 이름은 빌드 오류로 알립니다.
+// 예: .layout { grid-template-columns: 1fr; @include mix.respond(md) { grid-template-columns: 1fr 1fr; } }
+// md는 768px 이상입니다. 공통 mixins의 max-width 기반 responsive()와 방향이 다릅니다.
+@mixin respond($name) {
+  @if not map.has-key(tokens.$breakpoints, $name) {
+    @error 'Unknown breakpoint: #{$name}';
+  }
+  @media (min-width: map.get(tokens.$breakpoints, $name)) {
+    @content;
+  }
+}
+
+// container-up($width): 뷰포트가 아닌 이름이 recipe인 조상 컨테이너의 너비를 검사합니다.
+// 준비: 부모에 container-type: inline-size; container-name: recipe; 를 선언하세요.
+// 예: .child { @include mix.container-up(480px) { display: grid; grid-template-columns: 1fr 1fr; } }
+// 컨테이너 자신의 크기를 검사해 자신을 바꾸는 용도가 아니라, 자손 스타일을 바꿀 때 사용합니다.
+// 사용처: 사이드 패널·대시보드 카드처럼 배치 위치마다 사용 가능한 너비가 다른 컴포넌트.
+@mixin container-up($width) {
+  @container recipe (min-width: #{$width}) {
+    @content;
+  }
+}
+
+// truncate($lines): 긴 텍스트를 지정한 줄 수에서 시각적으로 자릅니다.
+// $lines: 1 이상의 정수. 1줄이면 ellipsis, 2줄 이상이면 line-clamp 패턴을 사용합니다.
+// 예: .title { max-width: 240px; @include mix.truncate; }
+// 예: .description { @include mix.truncate(3); }
+// 너비 제한이 있어야 줄바꿈·말줄임을 확인할 수 있습니다. flex 자식은 min-width: 0도 검토하세요.
+// 원문은 DOM에 남습니다. 중요한 내용은 펼치기 등 별도로 읽을 수 있는 방법을 제공하세요.
+@mixin truncate($lines: 1) {
+  @if meta.type-of($lines) != number {
+    @error 'truncate() expects a positive integer.';
+  }
+  @if not math.is-unitless($lines) or $lines < 1 or math.floor($lines) != $lines {
+    @error 'truncate() expects a positive integer.';
+  }
+  overflow: hidden;
+  @if $lines == 1 {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $lines;
+  }
+}
+
+// focus-visible: 브라우저가 포커스 표시가 필요하다고 판단할 때 외곽선을 제공합니다.
+// 예: .button { @include mix.focus-visible; } → .button:focus-visible 규칙 생성.
+// 사용처: 버튼·링크·입력 컨트롤. 주로 키보드 탐색 시 표시되며 마우스에도 표시될 수 있습니다.
+// 적용 대상이 실제로 포커스 가능해야 하며, 부모의 overflow에 외곽선이 잘리지 않게 확인하세요.
+@mixin focus-visible {
+  &:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+  }
+}
+
+// auto-grid($min, $gap): 카드 최소 너비와 공간에 따라 열 수가 자동으로 바뀌는 그리드입니다.
+// 기본값: 최소 너비 180px, 간격 16px. $min에는 px/rem 같은 길이를 전달하세요.
+// 예: .products { @include mix.auto-grid($min: 220px, $gap: 24px); }
+// auto-fit은 빈 열을 접고, min(100%, $min)은 부모가 더 좁을 때 최소 너비를 제한합니다.
+// 사용처: 상품 목록·KPI 카드·갤러리. 긴 자식 콘텐츠에는 min-width: 0도 함께 적용하세요.
+@mixin auto-grid($min: 180px, $gap: fn.space(4)) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, $min), 1fr));
+  gap: $gap;
+}
+
+// [토큰 기반 UI] 아래 믹스인은 공개 함수와 토큰을 조합합니다.
+// common 모듈을 재사용하며, 단독 복사할 때는 의존 파일 경로도 함께 유지하세요.
+
+// button($tone, $size, $outline, $ink): 기본 버튼·크기·외곽선 변형.
+// 예: @include ui.button(primary, md); @include ui.button(danger, sm, true);
+// 커스텀 색상은 텍스트 대비를 확인하고 $ink를 직접 지정하세요. HTML type·disabled는 별도입니다.
+@mixin button($tone: primary, $size: md, $outline: false, $ink: null) {
+  $color: fn.tone($tone);
+  $control: fn.token(tokens.$control-sizes, $size);
+  @include common.button-reset;
+  @include common.focus-ring;
+  @include common.disabled-state;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: fn.space(2);
+  min-height: fn.token($control, height);
+  padding-inline: fn.token($control, padding);
+  border: 1px solid $color;
+  border-radius: fn.radius(sm);
+  font-weight: fn.font-weight(semibold);
+  @if $outline {
+    background: transparent;
+    color: var(--text);
+  } @else {
+    background: $color;
+    @if $ink != null {
+      color: $ink;
+    } @else if $tone == primary {
+      color: #fff;
+    } @else {
+      color: #0f172a;
+    }
+  }
+}
+
+// badge($tone): 상태 색상의 테두리·배경과 테마 텍스트를 가진 뱃지.
+// 예: @include ui.badge(success); 색상뿐 아니라 성공/실패 텍스트도 함께 표시하세요.
+@mixin badge($tone: primary) {
+  display: inline-flex;
+  align-items: center;
+  padding: fn.space(1) fn.space(2);
+  border: 1px solid fn.alpha(fn.tone($tone), 0.5);
+  border-radius: fn.radius(pill);
+  background: fn.alpha(fn.tone($tone), 0.12);
+  color: var(--text);
+  font-size: fn.font-size(sm);
+  font-weight: fn.font-weight(semibold);
+}
+
+// input($invalid): 입력 필드 표면·테마·포커스와 정적 오류 변형.
+// 예: @include ui.input; &--invalid { @include ui.input(true); } label과 aria-invalid는 HTML에서 연결.
+@mixin input($invalid: false) {
+  @include common.field-base(44px, fn.space(3));
+  @include common.focus-ring;
+  @include common.placeholder(var(--muted));
+  border-radius: fn.radius(sm);
+  @if $invalid {
+    border-color: fn.tone(danger);
+  }
+}
+
+// icon-button($size): 아이콘 단독 버튼의 누름 영역. 이름은 aria-label 또는 숨김 텍스트로 제공.
+// 예: @include ui.icon-button(44px); 실제 버튼 동작·비활성 속성은 HTML/Vue에서 연결합니다.
+@mixin icon-button($size: 44px) {
+  @include common.button-reset;
+  @include common.touch-target($size);
+  @include common.focus-ring;
+  @include common.disabled-state;
+  border: 1px solid var(--border);
+  border-radius: fn.radius(sm);
+  background: var(--surface);
+}
+
+// divider($space): 경계선과 위아래 여백. 예: @include ui.divider(4); → 16px 여백.
+// <hr>에 적용하면 주제 전환 의미를 유지합니다. 단순 장식은 border만 사용해도 됩니다.
+@mixin divider($space: 4) {
+  border: 0;
+  border-block-start: 1px solid var(--border);
+  margin-block: fn.space($space);
+}
+
+// safe-area($side, $space): 기기 안전 영역과 기본 여백 중 큰 값을 적용합니다.
+// 예: @include ui.safe-area(bottom, 4); 환경값은 기기·viewport 설정에 따라 0일 수 있습니다.
+@mixin safe-area($side: bottom, $space: 4) {
+  @if not list.index((top, right, bottom, left), $side) {
+    @error 'safe-area side must be top/right/bottom/left.';
+  }
+  padding-#{$side}: max(#{fn.space($space)}, env(safe-area-inset-#{$side}, 0px));
+}
+
+// media($ratio, $fit): 이미지 영역의 비율과 자식 img 채우기. 예: @include ui.media(1);
+// cover는 일부를 자를 수 있고 contain은 전체를 보여줍니다. alt는 HTML에서 지정하세요.
+@mixin media($ratio: 1.777778, $fit: cover) {
+  @include common.aspect-frame($ratio);
+  > img {
+    @include common.image-cover;
+    object-fit: $fit;
+  }
+}
+
+// scroll-panel($height): 높이 제한 목록과 토큰 패딩. 예: @include ui.scroll-panel(240px);
+// 키보드 스크롤 접근을 위한 tabindex와 이름은 HTML에서 별도로 제공합니다.
+@mixin scroll-panel($height: 320px) {
+  @include common.scroll-area($height);
+  padding: fn.space(3);
+}
+
+// overlay($layer): 모달 배경 구조. 예: @include ui.overlay(modal); 실제 dialog의 포커스 관리는 별도.
+// fixed는 뷰포트 기준입니다. 데모에서는 position을 absolute로 바꿔 예제 프레임 안에 제한합니다.
+@mixin overlay($layer: overlay) {
+  @include common.inset-fill(fixed);
+  z-index: fn.z($layer);
+  display: grid;
+  place-items: center;
+  padding: fn.space(6);
+  background: #0006;
+  overflow: auto;
+}
+
+// card-grid($min, $gap): 간격 단계와 자동 열 그리드. 예: @include ui.card-grid(220px, 4);
+// gap 인자는 px가 아니라 space()의 단계 숫자입니다.
+@mixin card-grid($min: 240px, $gap: 4) {
+  @include common.auto-grid($min, fn.space($gap));
+}
+
+// split-layout($sidebar, $gap): 좁은 화면 1열, lg(1024px)부터 사이드바+본문.
+// 예: @include ui.split-layout(240px, 6); HTML에서 사이드바를 먼저 배치하세요.
+@mixin split-layout($sidebar: 260px, $gap: 6) {
+  display: grid;
+  gap: fn.space($gap);
+  grid-template-columns: minmax(0, 1fr);
+  @include respond(lg) {
+    grid-template-columns: $sidebar minmax(0, 1fr);
+  }
+}
+
+// focus-outline($color, $width, $offset): 요소별 포커스 색상과 두께 조절.
+// 예: @include ui.focus-outline(var(--primary), 2px, 4px); 기본 outline을 무조건 없애지 마세요.
+@mixin focus-outline($color: var(--primary), $width: 3px, $offset: 3px) {
+  &:focus-visible {
+    outline: $width solid $color;
+    outline-offset: $offset;
+  }
+}
+
+// transition($property, $speed): 토큰 시간·곡선과 모션 감소 대체.
+// 예: @include ui.transition(background-color, fast); 모든 속성을 뜻하는 all보다 필요한 속성만 지정.
+@mixin transition($property: color, $speed: normal) {
+  transition: $property fn.duration($speed) fn.easing(standard);
+  @include common.reduced-motion {
+    transition: none;
+  }
+}
+
+// interactive($offset): hover 가능한 환경의 작은 이동과 키보드 포커스.
+// 예: @include ui.interactive(-2px); 필수 정보를 hover에서만 보여주지 마세요.
+@mixin interactive($offset: -1px) {
+  @include transition(transform, fast);
+  @include focus-outline;
+  @include common.hover-capable {
+    transform: translateY($offset);
+  }
+  @include common.reduced-motion {
+    &,
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// skeleton-block($height): 공통 스켈레톤과 토큰 반경. 예: @include ui.skeleton-block(72px);
+// 모양을 만드는 CSS입니다. 실제 로딩 상태·aria-busy는 앱에서 관리하세요.
+@mixin skeleton-block($height: 72px) {
+  @include common.skeleton;
+  height: $height;
+  border-radius: fn.radius(md);
+}
+
+// print-only: 인쇄할 때만 보이는 보조 문구. 예: .print-note { @include ui.print-only; }
+// 화면에 숨겨도 보조 기술에서 읽을 필수 정보라면 다른 숨김 패턴을 검토하세요.
+@mixin print-only {
+  @media not print {
+    display: none;
+  }
+  @media print {
+    display: block;
+  }
+}
