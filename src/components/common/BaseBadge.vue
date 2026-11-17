@@ -15,6 +15,8 @@ defineProps({
   <span class="base-badge" :class="[`base-badge--${tone}`, `base-badge--${size}`]">
     <span v-if="dot" class="base-badge__dot" aria-hidden="true" />
     <slot />
+    <!-- trailing에는 표시용 아이콘 또는 접근 가능한 버튼·링크를 전달합니다. -->
+    <span v-if="$slots.trailing" class="base-badge__trailing"><slot name="trailing" /></span>
   </span>
 </template>
 <style lang="scss" scoped>
@@ -54,6 +56,16 @@ defineProps({
   &--sm {
     font-size: 10px;
     padding: 2px 7px;
+  }
+  &__trailing {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    :deep(svg) {
+      display: block;
+      width: 13px;
+      height: 13px;
+    }
   }
   &__dot {
     width: 5px;
