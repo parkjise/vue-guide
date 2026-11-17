@@ -36,6 +36,18 @@
         "type": "Slot",
         "default": "없음",
         "description": "텍스트 오른쪽 표시 아이콘, 도움말 button, 상세 a 또는 선택 해제 버튼을 전달합니다."
+      },
+      {
+        "name": "BaseIconTooltip · label / text",
+        "type": "String",
+        "default": "필수",
+        "description": "label은 아이콘 버튼의 접근 가능한 이름, text는 툴팁 설명입니다. trailing slot 안에 사용합니다."
+      },
+      {
+        "name": "BaseIconTooltip · placement / default slot",
+        "type": "String / Slot",
+        "default": "top / CircleHelp",
+        "description": "top / bottom 배치를 요청합니다. 공간이 부족하면 자동 전환하며 slot으로 아이콘을 바꿀 수 있습니다."
       }
     ],
     "flow": [
@@ -49,7 +61,9 @@
       "점이나 색상만으로 의미를 전달하지 말고 승인 대기 같은 문구를 함께 넣습니다.",
       "표시용 아이콘은 aria-hidden=\"true\", 클릭 가능한 아이콘은 aria-label이 있는 button으로 구성합니다. 이동은 a를 사용합니다.",
       "도움말은 Tab과 Enter·Space로 열 수 있습니다. 모달의 Escape 닫기와 포커스 복원을 함께 확인하세요.",
-      "배지 전체를 button이나 a로 감싼 뒤 안에 버튼을 넣지 않습니다. 클릭 가능한 목록에서는 주 이동 링크와 배지 도움말 버튼을 형제 요소로 배치합니다."
+      "배지 전체를 button이나 a로 감싼 뒤 안에 버튼을 넣지 않습니다. 클릭 가능한 목록에서는 주 이동 링크와 배지 도움말 버튼을 형제 요소로 배치합니다.",
+      "짧은 보충 설명은 BaseIconTooltip을 #trailing 안에 배치합니다. hover·키보드 포커스·탭으로 확인하고 Escape 또는 바깥 클릭으로 닫습니다.",
+      "툴팁 내부에 버튼이나 링크를 넣지 않습니다. 추가 동작이나 긴 설명이 필요하면 도움말 모달 또는 별도의 팝오버를 사용합니다."
     ]
   },
   {

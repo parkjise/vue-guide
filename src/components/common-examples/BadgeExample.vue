@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { CircleHelp, Info, CircleCheck, LockKeyhole, ArrowUpRight, X } from 'lucide-vue-next';
+import BaseIconTooltip from '@/components/common/BaseIconTooltip.vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
 import BaseBadge from '@/components/common/BaseBadge.vue';
@@ -167,6 +168,58 @@ function removeTag(tag) {
       <p class="shared-example__note">
         이동은 a, 상태 변경은 button으로 구분합니다. 선택 해제는 부모 배열을 수정하며, 버튼의
         click.stop은 바깥 목록 행의 클릭이 함께 실행되는 것을 막습니다.
+      </p>
+    </section>
+    <section class="badge-example__section" aria-label="배지 아이콘 툴팁">
+      <h3>4. 아이콘에 올리면 나타나는 툴팁</h3>
+      <div class="shared-example__row">
+        <BaseBadge :tone="current.tone">
+          {{ current.label }}
+          <template #trailing>
+            <BaseIconTooltip
+              :label="current.label + ' 간단 설명'"
+              :text="
+                status === 'pending'
+                  ? '담당자가 신청 내용을 검토하고 있습니다. 승인 후 사용할 수 있습니다.'
+                  : status === 'active'
+                    ? '인증과 승인이 완료되어 서비스를 이용할 수 있습니다.'
+                    : '접근이 제한되었습니다. 권한 담당자에게 해제를 요청해 주세요.'
+              "
+            />
+          </template>
+        </BaseBadge>
+        <BaseBadge tone="info">
+          자동 갱신
+          <template #trailing>
+            <BaseIconTooltip
+              label="자동 갱신 주기 설명"
+              text="데이터는 5분마다 갱신됩니다. 화면에 표시되는 시각은 마지막 갱신 완료 시각입니다."
+              placement="bottom"
+            >
+              <Info :size="13" aria-hidden="true" />
+            </BaseIconTooltip>
+          </template>
+        </BaseBadge>
+        <BaseBadge tone="success">
+          보안 점검 완료
+          <template #trailing>
+            <BaseIconTooltip
+              label="보안 점검 범위 설명"
+              text="현재 항목의 필수 점검을 통과했습니다. 이 배지는 화면 예제이며 실제 보안 검사를 수행하지 않습니다."
+            >
+              <CircleCheck :size="13" aria-hidden="true" />
+            </BaseIconTooltip>
+          </template>
+        </BaseBadge>
+      </div>
+      <p class="shared-example__note">
+        마우스 hover 또는 Tab 포커스로 설명을 표시합니다. 아이콘을 누르면 열린 상태를 유지하고, 다시
+        누르거나 바깥을 누르거나 Escape를 누르면 닫힙니다. 설명 위로 마우스를 옮겨도 읽는 동안
+        유지됩니다.
+      </p>
+      <p class="shared-example__note">
+        짧은 보충 설명은 툴팁, 긴 내용이나 버튼이 필요한 안내는 위 도움말 모달을 사용합니다. 툴팁은
+        role="tooltip"과 aria-describedby로 아이콘에 연결됩니다.
       </p>
     </section>
     <BaseModal v-model="helpOpen" :title="helpTitle">
