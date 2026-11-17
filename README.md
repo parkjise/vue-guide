@@ -153,3 +153,9 @@ GitHub Pages 배포는 하위 경로용 base와 hash 라우터를 사용해 모�
 [공통 컴포넌트 화면](https://parkjise.github.io/vue-guide/#/common-components/library)에서 공통 UI 13종과 직원 관리 조합 예제를 확인합니다. 배지·버튼·입력·선택·알림·아바타·빈 상태·스켈레톤·카드·모달·탭·페이지네이션·토스트의 실제 동작, 부모 연결 흐름, props / events / slots와 전체 원본을 제공합니다.
 
 공통 구현은 `src/components/common/`, 사용 예제는 `src/components/common-examples/`, 안내 데이터는 `src/data/commonComponentGuide.json`에 있습니다. 업무 상태·검증·조회·등록은 부모 예제에서 처리하며 API 서버나 실제 초대 메일은 호출하지 않습니다. 각 예제의 코드 보기에서 부모와 의존 컴포넌트, 전역 스타일 및 mixin을 복사할 수 있습니다.
+
+## SM UI 새 창 보기
+
+SM 메뉴 상단의 **새 창으로 보기** 버튼은 `/sm/standalone`을 별도 탭/창으로 엽니다. 독립 경로는 가이드의 공통 헤더·사이드바·소스 보기 없이 동일한 SM 컴포넌트를 화면 높이에 맞춰 표시합니다. 상단 **SM 가이드 보기**로 일반 가이드 화면에 돌아올 수 있습니다.
+
+직접 접속: https://parkjise.github.io/vue-guide/#/sm/standalone

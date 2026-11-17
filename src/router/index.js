@@ -20,6 +20,13 @@ const router = createRouter({
   routes: [
     { path: '/', redirect: '/dashboard/default' },
     ...routes,
+    {
+      path: '/sm/standalone',
+      name: 'sm-standalone',
+      component: () => import('@/views/sm/portal.vue'),
+      props: { standalone: true },
+      meta: { title: 'SM UI', layout: 'standalone' }
+    },
     { path: '/:pathMatch(.*)*', redirect: '/dashboard/default' }
   ],
   scrollBehavior: () => ({ top: 0 })

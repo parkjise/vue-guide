@@ -555,3 +555,28 @@
     transform: translateY(-3px);
   }
 }
+
+// 독립 창에서는 브라우저 높이에 맞추고 채팅 영역만 스크롤합니다.
+.sm-portal--standalone {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  .sm-portal__demo {
+    flex-shrink: 0;
+  }
+  .sm-portal__workspace {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+  .sm-portal__guide-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #fff;
+    font-size: 11px;
+    border-bottom: 1px solid #ffffff77;
+  }
+}

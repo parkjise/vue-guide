@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { ArrowUpRight, Check, Code2 } from 'lucide-vue-next';
+import { ArrowUpRight, Check, Code2, ExternalLink } from 'lucide-vue-next';
 import CodeExampleCard from '@/components/common/CodeExampleCard.vue';
 import { getExampleFiles } from '@/data/codeSnippets';
 const props = defineProps({ example: { type: [Object, Function], required: true } });
@@ -36,6 +36,22 @@ const descriptions = {
       </details>
     </template>
     <template v-else-if="route.meta.folder === 'sm'">
+      <header class="reference-page__sm-toolbar">
+        <div>
+          <h1>SM UI</h1>
+          <p>새 창에서 가이드 메뉴 없이 SM 화면만 넓게 볼 수 있습니다.</p>
+        </div>
+        <RouterLink
+          :to="{ name: 'sm-standalone' }"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="reference-page__sm-open"
+          aria-label="SM UI 새 창으로 보기"
+        >
+          <ExternalLink :size="16" />
+          새 창으로 보기
+        </RouterLink>
+      </header>
       <component :is="props.example" />
       <details class="reference-page__dashboard-code">
         <summary>SM Vue · SCSS · Mixin 전체 소스 보기</summary>
@@ -191,6 +207,35 @@ const descriptions = {
     flex-wrap: wrap;
     a {
       color: var(--primary);
+    }
+  }
+  &__sm-toolbar {
+    @include flex-between;
+    flex-wrap: wrap;
+    h1 {
+      font-size: 24px;
+      margin: 0 0 6px;
+    }
+    p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      margin: 0;
+    }
+  }
+  &__sm-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 15px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    &:hover {
+      background: var(--hover);
     }
   }
   &__dashboard-code {

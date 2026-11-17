@@ -19,6 +19,7 @@ import SmMessage from '@/components/sm/SmMessage.vue';
 import { models, scenarioCards } from '@/data/smDemo';
 import { useSmChat } from '@/composables/useSmChat';
 import { useTheme } from '@/composables/useTheme';
+const props = defineProps({ standalone: { type: Boolean, default: false } });
 const { theme, toggle } = useTheme();
 const {
   dept,
@@ -84,12 +85,16 @@ function attachFile(event) {
 <template>
   <section
     class="sm-portal"
-    :class="{ 'sm-portal--dark': theme === 'dark' }"
+    :class="{ 'sm-portal--dark': theme === 'dark', 'sm-portal--standalone': props.standalone }"
     aria-label="SM Samsung Gauss Enterprise 데모"
     @keydown.esc="closeSidebar"
   >
     <div class="sm-portal__demo">
       <span>SM · INTERACTIVE WIREFRAME</span>
+      <RouterLink v-if="props.standalone" :to="{ name: 'sm-portal' }" class="sm-portal__guide-link">
+        SM 가이드 보기
+        <ArrowUpRight :size="13" />
+      </RouterLink>
       <p>UI 데모 · 샘플 답변 / 인증·사내 문서·보안망 연동 없음</p>
     </div>
     <div class="sm-portal__workspace">
