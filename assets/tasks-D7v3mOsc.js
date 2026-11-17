@@ -1,1 +1,0 @@
-import{T as s}from"./TaskList-DVrgTcrt.js";import{_ as t,o as e,a,d as o}from"./index-M3h9rAVq.js";const c={class:"demo"},_={__name:"tasks",setup(r){return(n,p)=>(e(),a("section",c,[o(s,{title:"팀 태스크"})]))}},i=t(_,[["__scopeId","data-v-26b12f1e"]]);export{i as default};
