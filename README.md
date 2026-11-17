@@ -147,3 +147,9 @@ VITE_BASE_PATH=/vue-guide/ VITE_ROUTER_MODE=hash VITE_STATIC_DEPLOY=true npm run
 ```
 
 GitHub Pages 배포는 하위 경로용 base와 hash 라우터를 사용해 모든 메뉴와 직접 링크를 지원합니다. 공개 화면의 BEM / AI Q&A는 샘플 모드이며 개인 API 서버를 호출하지 않습니다. `.env.local`은 업로드하지 않습니다. 로컬에서 `npm run dev`를 실행하면 기존 실제 AI 기능을 그대로 사용할 수 있습니다.
+
+## 공통 컴포넌트 실무 가이드
+
+[공통 컴포넌트 화면](https://parkjise.github.io/vue-guide/#/common-components/library)에서 공통 UI 13종과 직원 관리 조합 예제를 확인합니다. 배지·버튼·입력·선택·알림·아바타·빈 상태·스켈레톤·카드·모달·탭·페이지네이션·토스트의 실제 동작, 부모 연결 흐름, props / events / slots와 전체 원본을 제공합니다.
+
+공통 구현은 `src/components/common/`, 사용 예제는 `src/components/common-examples/`, 안내 데이터는 `src/data/commonComponentGuide.json`에 있습니다. 업무 상태·검증·조회·등록은 부모 예제에서 처리하며 API 서버나 실제 초대 메일은 호출하지 않습니다. 각 예제의 코드 보기에서 부모와 의존 컴포넌트, 전역 스타일 및 mixin을 복사할 수 있습니다.

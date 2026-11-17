@@ -183,6 +183,20 @@ export const menuGroups = [
     ]
   },
   {
+    title: '공통 컴포넌트',
+    icon: 'Component',
+    direct: true,
+    children: [
+      {
+        path: '/common-components/library',
+        title: '공통 컴포넌트',
+        description: '재사용 UI 13종 · props·emit·slot·실무 조합 예제',
+        folder: 'common-components',
+        slug: 'library'
+      }
+    ]
+  },
+  {
     title: 'Vue 실무예제',
     icon: 'Workflow',
     direct: true,

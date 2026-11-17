@@ -35,6 +35,8 @@ export function getExampleFiles(path, sourceFile = '') {
   }
   if (sourceFile) {
     collect(sourceFile);
+    if (visited.has('/src/composables/useToast.js'))
+      collect('/src/components/common/BaseToast.vue');
     if (sourceFile === '/src/assets/styles/_mixins.scss')
       collect('/src/assets/styles/_variables.scss');
     return files;

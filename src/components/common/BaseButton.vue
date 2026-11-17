@@ -1,12 +1,22 @@
 <script setup>
+// native button 속성·이벤트는 루트 버튼으로 전달됩니다. 로딩 중 중복 클릭을 막습니다.
 defineProps({
   variant: { type: String, default: 'primary' },
   type: { type: String, default: 'button' },
-  disabled: { type: Boolean, default: false }
+  disabled: { type: Boolean, default: false },
+  loading: { type: Boolean, default: false },
+  size: { type: String, default: 'md' }
 });
 </script>
 <template>
-  <button :type="type" :disabled="disabled" class="base-button" :class="`base-button--${variant}`">
+  <button
+    :type="type"
+    :disabled="disabled || loading"
+    :aria-busy="loading ? 'true' : undefined"
+    class="base-button"
+    :class="[`base-button--${variant}`, `base-button--${size}`]"
+  >
+    <span v-if="loading" class="base-button__spinner" aria-hidden="true" />
     <slot />
   </button>
 </template>
@@ -30,6 +40,31 @@ defineProps({
   &--danger {
     background: var(--danger);
     color: #fff;
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--danger), #000 15%);
+    }
+  }
+  &--sm {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  &__spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: button-spin 0.8s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &__spinner {
+      animation: none;
+    }
+  }
+}
+@keyframes button-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
