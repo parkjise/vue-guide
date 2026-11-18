@@ -186,7 +186,13 @@ onUnmounted(() => {
                     : names[provider] + ' API 키 미설정'
           }}
         </strong>
-        <p v-if="active">{{ active.model }}</p>
+        <p v-if="active">
+          {{
+            staticDeployment
+              ? '로그인한 개인 AI 화면에서 실제 질문을 보낼 수 있습니다.'
+              : active.model
+          }}
+        </p>
       </section>
       <button :disabled="busy" @click="checkStatus">
         <RefreshCw :size="14" />
@@ -226,7 +232,13 @@ onUnmounted(() => {
       <section v-if="!messages.length && !busy" class="ai-assistant__empty">
         <Sparkles :size="32" />
         <h4>어떤 질문으로 시작할까요?</h4>
-        <p>{{ staticDeployment ? '샘플 대화를 확인하거나 로그인한 개인 AI 화면에서 질문하세요.' : '질문 예시를 눌러 내용을 바꾼 뒤 전송하세요.' }}</p>
+        <p>
+          {{
+            staticDeployment
+              ? '샘플 대화를 확인하거나 로그인한 개인 AI 화면에서 질문하세요.'
+              : '질문 예시를 눌러 내용을 바꾼 뒤 전송하세요.'
+          }}
+        </p>
         <div class="ai-assistant__prompts">
           <button
             v-for="prompt in [
