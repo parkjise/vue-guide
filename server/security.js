@@ -2,18 +2,9 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { existsSync, lstatSync, realpathSync, readdirSync, readFileSync, chmodSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
-const SECRET_PATTERN = /\b(?:AIza[\w-]{35}|sk-(?:proj-|svcacct-)?[\w-]{20,})/;
+import { hasSecret } from './secret-text.js';
+export { hasSecret } from './secret-text.js';
 const PRIVATE_NAMES = ['GEMINI_API_KEY', 'OPENAI_API_KEY', 'GEMINI_MODEL', 'OPENAI_MODEL'];
-export function hasSecret(value, config = {}) {
-  const text = typeof value === 'string' ? value : JSON.stringify(value) || '';
-  return (
-    SECRET_PATTERN.test(text) ||
-    ['GEMINI_API_KEY', 'OPENAI_API_KEY'].some((name) => {
-      const key = config[name]?.trim();
-      return key && key.length >= 8 && text.includes(key);
-    })
-  );
-}
 export function selectPrivateConfig(allEnv) {
   const config = Object.fromEntries(
     PRIVATE_NAMES.map((name) => [name, allEnv[name]?.trim() || ''])

@@ -159,3 +159,9 @@ GitHub Pages 배포는 하위 경로용 base와 hash 라우터를 사용해 모�
 SM 메뉴 상단의 **새 창으로 보기** 버튼은 `/sm/standalone`을 별도 탭/창으로 엽니다. 독립 경로는 가이드의 공통 헤더·사이드바·소스 보기 없이 동일한 SM 컴포넌트를 화면 높이에 맞춰 표시합니다. 상단 **SM 가이드 보기**로 일반 가이드 화면에 돌아올 수 있습니다.
 
 직접 접속: https://parkjise.github.io/vue-guide/#/sm/standalone
+
+## 개인 로그인 AI
+
+공개 AI Q&A의 **로그인하고 질문하기**는 [개인 전용 AI](https://vue-guide-personal-ai.cheerytapioca1.chatgpt.site/)를 새 창으로 엽니다. 이 사이트는 Sites 소유자만 ChatGPT 로그인 후 접근할 수 있습니다. 실제 API 호출은 전용 서버에서 처리하고 개인 키는 Sites 비밀 환경변수로 보관합니다. 현재 Gemini를 연결했으며 OpenAI 키 등록에는 OpenAI Developers 플러그인의 승인 절차가 필요합니다.
+
+전용 앱 소스는 `private-ai-site/`의 별도 비공개 Sites 저장소로 관리하며 공개 GitHub에는 포함하지 않습니다. 로컬 AI 기능은 기존대로 유지됩니다.

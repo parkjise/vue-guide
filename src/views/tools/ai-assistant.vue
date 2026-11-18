@@ -14,6 +14,8 @@ import {
 } from 'lucide-vue-next';
 import { useClipboard } from '@/composables/useClipboard';
 import { buildConversation, answerBlocks } from '@/composables/assistantText';
+const privateAiUrl = 'https://vue-guide-personal-ai.cheerytapioca1.chatgpt.site/';
+const hostedPrivate = import.meta.env.VITE_PRIVATE_AI === 'true';
 const provider = ref('gemini');
 const names = { gemini: 'Gemini', openai: 'OpenAI' };
 const status = ref(null),
@@ -174,7 +176,7 @@ onUnmounted(() => {
         <strong>
           {{
             staticDeployment
-              ? '공개 데모 · AI 서버 미연결'
+              ? '공개 샘플 · 개인 AI는 로그인 후 이용'
               : statusError
                 ? '서버 확인 필요'
                 : status === null
@@ -193,8 +195,11 @@ onUnmounted(() => {
     </section>
     <p v-if="statusError" class="demo__error" role="alert">{{ statusError }}</p>
     <aside v-if="staticDeployment" class="ai-assistant__notice">
-      공개 화면에서는 샘플 대화만 제공합니다. 실제 질문 전송은 개인 키를 설정한 로컬 서버에서
-      이용하세요.
+      공개 화면은 샘플 대화입니다. 실제 질문은 아래 ‘로그인하고 질문하기’에서 본인 전용 AI 화면을
+      열어 이용하세요. API 키는 전용 서버에 보관합니다.
+    </aside>
+    <aside v-else-if="hostedPrivate && status && !ready" class="ai-assistant__notice">
+      선택한 공급자의 서버 API 키가 아직 설정되지 않았습니다. 설정된 공급자를 선택해 주세요.
     </aside>
     <aside v-else-if="status && !ready" class="ai-assistant__notice">
       기존 BEM 생성기와 같은 개인 API 키를 사용합니다.
@@ -221,7 +226,7 @@ onUnmounted(() => {
       <section v-if="!messages.length && !busy" class="ai-assistant__empty">
         <Sparkles :size="32" />
         <h4>어떤 질문으로 시작할까요?</h4>
-        <p>질문 예시를 눌러 내용을 바꾼 뒤 전송하세요.</p>
+        <p>{{ staticDeployment ? '샘플 대화를 확인하거나 로그인한 개인 AI 화면에서 질문하세요.' : '질문 예시를 눌러 내용을 바꾼 뒤 전송하세요.' }}</p>
         <div class="ai-assistant__prompts">
           <button
             v-for="prompt in [
@@ -313,7 +318,16 @@ onUnmounted(() => {
           <Square :size="13" />
           취소
         </button>
-        <button type="submit" class="demo__primary" :disabled="busy || !ready || !valid">
+        <a
+          v-if="staticDeployment"
+          :href="privateAiUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ai-assistant__private-link"
+        >
+          로그인하고 질문하기 ↗
+        </a>
+        <button v-else type="submit" class="demo__primary" :disabled="busy || !ready || !valid">
           <Send :size="14" />
           질문 전송
         </button>
@@ -341,6 +355,20 @@ onUnmounted(() => {
   @include custom-scrollbar;
   min-width: 0;
   gap: 20px;
+  &__private-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    &:hover {
+      background: var(--hover);
+    }
+  }
   &__intro {
     display: flex;
     align-items: center;

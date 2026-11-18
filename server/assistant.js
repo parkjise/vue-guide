@@ -1,6 +1,6 @@
 import { BemError } from './errors.js';
 import { providerConfig } from './providers.js';
-import { hasSecret } from './security.js';
+import { hasSecret } from './secret-text.js';
 
 export function validateConversation(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body))

@@ -6,3 +6,6 @@ test-results/
 .env
 .env.*
 !.env.example
+
+# Separately versioned private Sites application and runtime state
+/private-ai-site/
