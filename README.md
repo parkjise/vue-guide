@@ -160,8 +160,8 @@ SM 메뉴 상단의 **새 창으로 보기** 버튼은 `/sm/standalone`을 별�
 
 직접 접속: https://parkjise.github.io/vue-guide/#/sm/standalone
 
-## 개인 로그인 AI
+## 개인 AI · 기기 등록 방식
 
-공개 AI Q&A의 **로그인하고 질문하기**는 [개인 전용 AI](https://vue-guide-personal-ai.cheerytapioca1.chatgpt.site/)를 새 창으로 엽니다. 이 사이트는 Sites 소유자만 ChatGPT 로그인 후 접근할 수 있습니다. 실제 API 호출은 전용 서버에서 처리하고 개인 키는 Sites 비밀 환경변수로 보관합니다. 현재 Gemini를 연결했으며 OpenAI 키 등록에는 OpenAI Developers 플러그인의 승인 절차가 필요합니다.
+공개 AI Q&A의 **개인 AI 바로 사용하기**는 [개인 AI](https://vue-guide-personal-ai.cheerytapioca1.chatgpt.site/)를 새 창으로 엽니다. ChatGPT 로그인 없이, 처음 등록한 브라우저의 HttpOnly 쿠키로 AI API 접근을 확인합니다. 등록하지 않은 브라우저는 안내 화면만 볼 수 있으며 실제 질문을 보낼 수 없습니다.
 
-전용 앱 소스는 `private-ai-site/`의 별도 비공개 Sites 저장소로 관리하며 공개 GitHub에는 포함하지 않습니다. 로컬 AI 기능은 기존대로 유지됩니다.
+기기 등록은 브라우저별 180일 유지됩니다. 등록 파일은 `/Users/Js/Work/Vue/private-ai-site/.device-setup/기기등록.html`에 로컬로만 보관하며 공개 GitHub와 배포 번들에서 제외합니다. 파일에는 기기 등록 권한이 있으므로 타인에게 공유하지 않습니다. 실제 Gemini / OpenAI API 키는 전용 서버에만 보관합니다. 전용 앱은 별도 비공개 Sites 저장소에서 관리합니다.

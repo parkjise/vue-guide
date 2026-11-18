@@ -176,7 +176,7 @@ onUnmounted(() => {
         <strong>
           {{
             staticDeployment
-              ? '공개 샘플 · 개인 AI는 로그인 후 이용'
+              ? '공개 샘플 · 개인 AI는 기기 등록 후 이용'
               : statusError
                 ? '서버 확인 필요'
                 : status === null
@@ -189,7 +189,7 @@ onUnmounted(() => {
         <p v-if="active">
           {{
             staticDeployment
-              ? '로그인한 개인 AI 화면에서 실제 질문을 보낼 수 있습니다.'
+              ? '등록된 브라우저의 개인 AI 화면에서 질문할 수 있습니다.'
               : active.model
           }}
         </p>
@@ -201,7 +201,7 @@ onUnmounted(() => {
     </section>
     <p v-if="statusError" class="demo__error" role="alert">{{ statusError }}</p>
     <aside v-if="staticDeployment" class="ai-assistant__notice">
-      공개 화면은 샘플 대화입니다. 실제 질문은 아래 ‘로그인하고 질문하기’에서 본인 전용 AI 화면을
+      공개 화면은 샘플 대화입니다. 실제 질문은 아래 ‘개인 AI 바로 사용하기’에서 본인 전용 AI 화면을
       열어 이용하세요. API 키는 전용 서버에 보관합니다.
     </aside>
     <aside v-else-if="hostedPrivate && status && !ready" class="ai-assistant__notice">
@@ -235,7 +235,7 @@ onUnmounted(() => {
         <p>
           {{
             staticDeployment
-              ? '샘플 대화를 확인하거나 로그인한 개인 AI 화면에서 질문하세요.'
+              ? '샘플 대화를 확인하거나 기기를 등록한 개인 AI 화면에서 질문하세요.'
               : '질문 예시를 눌러 내용을 바꾼 뒤 전송하세요.'
           }}
         </p>
@@ -337,7 +337,7 @@ onUnmounted(() => {
           rel="noopener noreferrer"
           class="ai-assistant__private-link"
         >
-          로그인하고 질문하기 ↗
+          개인 AI 바로 사용하기 ↗
         </a>
         <button v-else type="submit" class="demo__primary" :disabled="busy || !ready || !valid">
           <Send :size="14" />
