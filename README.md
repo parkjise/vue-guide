@@ -22,7 +22,7 @@ npx playwright test
 
 ## 구성
 
-- 기본 문법 6종, 실무 패턴 6종, 대시보드·위젯 5종, 앱 17종, UI Kit·Bonus UI 25종, Forms·Tables 5종, SCSS 실무 가이드 8종, SCSS 원본 소스 5종: BEM Generator와 AI Q&A, Vue 실무예제, HTML5, CSS3 메뉴를 포함해 총 82개 경로
+- 기본 문법 6종, 실무 패턴 6종, 대시보드·위젯 5종, 앱 17종, UI Kit·Bonus UI 25종, Forms·Tables 5종, SCSS 실무 가이드 8종, SCSS 원본 소스 5종: BEM Generator와 AI Q&A, Vue 실무예제, HTML5, CSS3 메뉴를 포함해 팁 8개 메뉴와 공통 컴포넌트·SM을 포함해 총 92개 메뉴 경로
 - `src/data/menuData.js`를 기준으로 사이드바와 라우터를 함께 생성합니다.
 - `src/views`의 실제 SFC를 `?raw`로 읽어 코드 뷰어에 표시합니다. 필요한 공통 컴포넌트와 Composable, 공통 Sass 파일도 파일 선택에서 볼 수 있습니다.
 - 코드 탭을 선택하면 해당 블록을 복사합니다. 처음에는 전체 `.vue` 코드가 선택됩니다.
@@ -37,6 +37,12 @@ npx playwright test
 장바구니와 테마는 localStorage에 저장합니다. 프로젝트·태스크·북마크·연락처·달력 등 다른 앱 데이터는 새로고침하면 초기화됩니다. API 예제는 동일 출처 정적 JSON을 fetch하며 실패·재시도·요청 취소 흐름을 제공합니다.
 
 프로덕션 호스팅은 SPA fallback(모든 앱 URL → `index.html`)을 설정해야 합니다. Vite 개발/프리뷰 서버에서는 직접 경로 접근을 지원합니다.
+
+## Vue 3 실무 퍼블리싱 팁
+
+[팁 화면 열기](https://parkjise.github.io/vue-guide/#/tips/style-architecture). 스타일·SCSS, 마크업·디렉티브, 레이아웃·상태, 에셋·모션, 접근성·폼, 데이터·성능, 협업·배포 7개 분야에 42개 팁과 실제 Vue 동작 예제를 제공합니다. 각 팁은 이유·사용법·주의점·핵심 코드·확인 항목으로 구성되며, 예제의 전체 SFC와 공통 SCSS·에셋은 코드 보기에서 복사할 수 있습니다.
+
+전체 체크리스트 메뉴에서는 검색·분야별 링크·일괄 체크·Markdown 복사 및 다운로드를 지원합니다. 진행 상태는 현재 브라우저 localStorage에만 저장하며, 저장소를 차단한 환경에서도 화면 내 체크와 내보내기는 사용할 수 있습니다. 모달 예제는 중첩 스크롤 잠금과 해제 복원을, 검색 예제는 이전 지연 작업 취소·빈 결과·오류 복구를 시연합니다. Vite SCSS 자동 주입 설정은 선택 적용용 참고 파일이며 앱 설정은 기존 명시적 `@use` 방식을 유지합니다.
 
 ## SCSS 실무 가이드
 

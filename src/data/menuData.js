@@ -197,6 +197,68 @@ export const menuGroups = [
     ]
   },
   {
+    title: '팁',
+    icon: 'Layers',
+    children: [
+      {
+        path: '/tips/style-architecture',
+        title: '스타일·SCSS',
+        description: '전역·로컬 스타일, 토큰, @use, :deep(), 동적 CSS 값을 정리합니다.',
+        folder: 'tips',
+        slug: 'style-architecture'
+      },
+      {
+        path: '/tips/markup-directives',
+        title: '마크업·디렉티브',
+        description: '조건부 클래스, 반복 마크업, 상태 유지, props와 속성 전달을 다룹니다.',
+        folder: 'tips',
+        slug: 'markup-directives'
+      },
+      {
+        path: '/tips/layout-defense',
+        title: '레이아웃·상태',
+        description: '모달·스크롤·긴 텍스트·목록 4상태·에디터 본문을 방어합니다.',
+        folder: 'tips',
+        slug: 'layout-defense'
+      },
+      {
+        path: '/tips/assets-motion',
+        title: '에셋·모션',
+        description: 'SVG, base 경로, 전환·리스트 모션, 반응형 분기를 다룹니다.',
+        folder: 'tips',
+        slug: 'assets-motion'
+      },
+      {
+        path: '/tips/accessibility-forms',
+        title: '접근성·폼',
+        description: '버튼·포커스·폼·동적 안내를 키보드와 보조 기술 관점에서 검수합니다.',
+        folder: 'tips',
+        slug: 'accessibility-forms'
+      },
+      {
+        path: '/tips/data-performance',
+        title: '데이터·성능',
+        description: '검색 취소, 순서 보존, 대량 목록, 로딩과 자원 정리를 다룹니다.',
+        folder: 'tips',
+        slug: 'data-performance'
+      },
+      {
+        path: '/tips/workflow-release',
+        title: '협업·배포',
+        description: '퍼블리싱 인계 기준과 실제 배포에서 흔한 문제를 확인합니다.',
+        folder: 'tips',
+        slug: 'workflow-release'
+      },
+      {
+        path: '/tips/checklist',
+        title: '전체 체크리스트',
+        description: '42개 실무 확인 항목 · 브라우저 저장 · Markdown 내보내기',
+        folder: 'tips',
+        slug: 'checklist'
+      }
+    ]
+  },
+  {
     title: 'Vue 실무예제',
     icon: 'Workflow',
     direct: true,

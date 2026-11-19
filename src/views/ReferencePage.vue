@@ -67,7 +67,9 @@ const descriptions = {
       </details>
     </template>
     <template
-      v-else-if="['vue-practice', 'html5', 'css3', 'common-components'].includes(route.meta.folder)"
+      v-else-if="
+        ['vue-practice', 'html5', 'css3', 'common-components', 'tips'].includes(route.meta.folder)
+      "
     >
       <component :is="props.example" />
     </template>

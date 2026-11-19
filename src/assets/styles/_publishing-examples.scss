@@ -1,0 +1,52 @@
+@use 'mixins' as mix;
+// 예제 공통 배치만 공유하고 실제 UI 스타일은 각 SFC에 둡니다.
+@mixin layout {
+  .publishing-demo {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+    &__row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    &__note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.9;
+      margin: 0;
+    }
+    &__box {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--canvas);
+      min-width: 0;
+    }
+    &__list {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      li {
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--surface);
+        font-size: 12px;
+      }
+    }
+    @include mix.responsive(mobile) {
+      &__grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  }
+}

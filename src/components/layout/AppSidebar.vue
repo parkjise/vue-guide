@@ -23,7 +23,7 @@ const emit = defineEmits({ close: () => true });
 const route = useRoute();
 const query = ref('');
 const collapsed = ref(
-  new Set(['Applications', 'UI Kits & Bonus UI', 'Forms & Tables', 'SCSS 실무 가이드'])
+  new Set(['Applications', 'UI Kits & Bonus UI', 'Forms & Tables', 'SCSS 실무 가이드', '팁'])
 );
 watch(
   () => route.path,
