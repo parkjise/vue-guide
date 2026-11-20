@@ -8,6 +8,7 @@ const sources = import.meta.glob(
     '/src/data/smDemo.js',
     '/src/assets/styles/**/*.scss',
     '/src/data/*.json',
+    '!/src/data/optionsSources.json',
     '!/src/data/vuePracticeQuestions.json',
     '!/src/data/htmlSemanticPatterns.json',
     '!/src/views/html5/**/*.vue',

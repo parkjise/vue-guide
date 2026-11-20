@@ -30,6 +30,12 @@ npx playwright test
 - 기본 경로는 Overview로 이동합니다. 미등록 경로도 Overview로 복귀합니다.
 - 모바일 사이드바, 테마 저장, 네이티브 dialog 포커스 관리, 키보드 Tabs·Rating, 상태 알림을 지원합니다.
 
+## Composition API / Options API 소스 비교
+
+각 Vue 예제의 코드 보기에서 **Composition API / Options API** 탭을 선택합니다. 전체 파일·template·script·SCSS 블록과 복사 기능에 선택한 방식이 반영됩니다. 화면의 실행 코드는 기존 `<script setup>`이며, Options 소스는 같은 기능을 `data`, `computed`, `methods`, `watch`, 생명주기 훅으로 작성합니다. `defineModel`은 props·computed get/set·update emit으로, 템플릿 ref는 `$refs`로 대응합니다. 공유 Composable과 `useId`가 필요한 예제는 공식 Vue 방식대로 `setup()`에서 연결하며 소스와 UI에 이를 안내합니다. 공통 JS·SCSS·HTML·CSS·에셋은 두 방식에서 함께 사용합니다.
+
+`npm run examples:options`는 현재 191개 SFC의 완전한 Options 소스를 생성하고 script/template 컴파일을 확인합니다. 원본 내용 식별자로 연결하므로 Vue 실무예제 정답처럼 파일명이 다르게 표시되는 코드 카드도 해당 예제와 일치합니다. `prebuild`와 `pretest`에서 갱신하고 알 수 없는 문법은 실패 처리합니다. Options 소스 묶음은 해당 탭을 처음 선택할 때만 불러오며, 실패 시 재시도 안내와 복사 차단을 제공합니다. `tests/options-examples.test.js`는 생성된 실제 SFC 및 자식 컴포넌트를 실행해 계산·watch·v-model·모달·검색 정리·BEM 모드별 결과와 실무예제 40종의 마운트를 검증합니다.
+
 ## 데모 데이터 범위
 
 채팅은 미리 작성한 로컬 응답이며 AI API를 호출하지 않습니다. 이메일은 세션 내 편지함만 변경합니다. 업로드는 파일 메타데이터만 추가하며 서버로 전송하지 않습니다. Checkout은 테스트 주문이며 결제하지 않습니다. 대시보드는 샘플 통계입니다.

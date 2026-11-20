@@ -108,8 +108,8 @@ const descriptions = {
               원본을 확인하고 복사하세요.
             </template>
             <template v-else>
-              모든 예제는 실제 Vue 3 &lt;script setup&gt;으로 동작합니다. 코드 보기에서 원본과 의존
-              파일을 확인하세요.
+              화면은 Vue 3 Composition API로 동작합니다. 코드 보기에서 Composition API와 Options API
+              예제를 비교하고, 선택한 방식의 전체 소스와 의존 파일을 복사하세요.
             </template>
           </p>
         </section>
