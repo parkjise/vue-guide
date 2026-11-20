@@ -115,9 +115,10 @@ watch(
   }
   &__main {
     padding: 24px 34px 34px;
-    max-width: 1680px;
     width: 100%;
-    margin: auto;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
     flex: 1;
     outline: none;
   }
