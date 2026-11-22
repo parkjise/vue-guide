@@ -7,6 +7,7 @@ import { useClipboard } from '@/composables/useClipboard';
 import { useToast } from '@/composables/useToast';
 import { codeQaAuth, deleteCodeAnswer, listCodeAnswers } from '@/lib/codeQa';
 import { renderCodeAnswer } from '@/lib/codeQaMarkdown';
+import { createCodeQaPreview } from '@/lib/codeQaPreview';
 
 const route = useRoute();
 const { copy } = useClipboard();
@@ -17,6 +18,7 @@ const items = ref([]);
 const selectedId = ref('');
 const selected = computed(() => items.value.find((item) => item.id === selectedId.value));
 const answer = computed(() => renderCodeAnswer(selected.value?.answerMarkdown || ''));
+const preview = computed(() => createCodeQaPreview(answer.value.previewHtml));
 const deleteOpen = ref(false);
 const deleteTarget = shallowRef(null);
 const deleting = ref(false);
@@ -206,6 +208,25 @@ async function signOut() {
         </div>
         <!-- MarkdownIt escapes HTML, and remote images are disabled. -->
         <div class="code-qa__markdown" @click="copyAnswerCode" v-html="answer.html" />
+        <section v-if="preview" class="code-qa__section" aria-labelledby="code-qa-preview">
+          <h2 id="code-qa-preview">수정 화면 미리보기</h2>
+          <p class="code-qa__hint">샘플 데이터로 표시한 HTML/CSS 화면이에요.</p>
+          <iframe
+            class="code-qa__preview"
+            title="수정 화면 미리보기"
+            :srcdoc="preview"
+            sandbox=""
+            referrerpolicy="no-referrer"
+          />
+        </section>
+        <section
+          v-if="answer.sourcesHtml"
+          class="code-qa__section"
+          aria-labelledby="code-qa-full-source"
+        >
+          <h2 id="code-qa-full-source">파일별 전체 소스</h2>
+          <div class="code-qa__markdown" @click="copyAnswerCode" v-html="answer.sourcesHtml" />
+        </section>
       </article>
     </div>
 
@@ -311,6 +332,26 @@ async function signOut() {
   }
   &__answer {
     overflow-wrap: anywhere;
+  }
+  &__section {
+    display: grid;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  &__section h2 {
+    font-size: 18px;
+  }
+  &__hint {
+    color: var(--muted);
+    font-size: 13px;
+  }
+  &__preview {
+    display: block;
+    width: 100%;
+    height: clamp(260px, 45vh, 480px);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #fff;
   }
   &__answer-actions,
   &__dialog-actions {
