@@ -8,8 +8,8 @@ test('Every menu has a unique route and a compilable script-setup SFC', () => {
   assert.equal(new Set(menuGroups.map((group) => group.title)).size, menuGroups.length);
   for (const group of menuGroups.filter((group) => group.direct))
     assert.equal(group.children.length, 1);
-  assert.equal(menuItems.length, 92);
-  assert.equal(new Set(menuItems.map((i) => i.path)).size, 92);
+  assert.equal(menuItems.length, 93);
+  assert.equal(new Set(menuItems.map((i) => i.path)).size, menuItems.length);
   for (const item of menuItems) {
     const path = 'src/views' + item.path + '.vue';
     assert.ok(existsSync(path), path);

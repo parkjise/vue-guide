@@ -49,6 +49,21 @@ export const menuGroups = [
     ]
   },
   {
+    title: 'Code Q&A',
+    icon: 'CodeXml',
+    direct: true,
+    children: [
+      {
+        path: '/tools/code-qa',
+        title: 'Code Q&A',
+        description: 'MyCode의 VUE → s 답변',
+        folder: 'tools',
+        slug: 'code-qa',
+        fullPage: true
+      }
+    ]
+  },
+  {
     title: 'SCSS 실무 가이드',
     icon: 'Palette',
     children: [

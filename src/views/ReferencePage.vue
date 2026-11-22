@@ -68,6 +68,7 @@ const descriptions = {
     </template>
     <template
       v-else-if="
+        route.meta.fullPage ||
         ['vue-practice', 'html5', 'css3', 'common-components', 'tips'].includes(route.meta.folder)
       "
     >

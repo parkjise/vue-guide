@@ -22,13 +22,19 @@ npx playwright test
 
 ## 구성
 
-- 기본 문법 6종, 실무 패턴 6종, 대시보드·위젯 5종, 앱 17종, UI Kit·Bonus UI 25종, Forms·Tables 5종, SCSS 실무 가이드 8종, SCSS 원본 소스 5종: BEM Generator와 AI Q&A, Vue 실무예제, HTML5, CSS3 메뉴를 포함해 팁 8개 메뉴와 공통 컴포넌트·SM을 포함해 총 92개 메뉴 경로
+- 기본 문법 6종, 실무 패턴 6종, 대시보드·위젯 5종, 앱 17종, UI Kit·Bonus UI 25종, Forms·Tables 5종, SCSS 실무 가이드 8종, SCSS 원본 소스 5종: BEM Generator와 AI Q&A, Vue 실무예제, HTML5, CSS3 메뉴를 포함해 팁 8개 메뉴와 공통 컴포넌트·SM을 포함해 총 93개 메뉴 경로
 - `src/data/menuData.js`를 기준으로 사이드바와 라우터를 함께 생성합니다.
 - `src/views`의 실제 SFC를 `?raw`로 읽어 코드 뷰어에 표시합니다. 필요한 공통 컴포넌트와 Composable, 공통 Sass 파일도 파일 선택에서 볼 수 있습니다.
 - 코드 탭을 선택하면 해당 블록을 복사합니다. 처음에는 전체 `.vue` 코드가 선택됩니다.
 - 복사한 예제는 이 프로젝트의 `@` 별칭, Vue Router, 전역 `src/assets/styles/main.scss` 환경을 기준으로 실행됩니다. `useToast` 예제는 앱에 `<BaseToast />`도 배치하세요. 네트워크 예제의 `src/data/apiPeople.json`도 함께 제공됩니다.
 - 기본 경로는 Overview로 이동합니다. 미등록 경로도 Overview로 복귀합니다.
 - 모바일 사이드바, 테마 저장, 네이티브 dialog 포커스 관리, 키보드 Tabs·Rating, 상태 알림을 지원합니다.
+
+## Code Q&A
+
+`/tools/code-qa`는 MyCode의 `VUE → s`에서 생성한 답변을 보여줍니다. Vue Guide의 `.env.local`에 MyCode와 같은 Supabase 프로젝트의 `VITE_SUPABASE_URL`과 `VITE_SUPABASE_ANON_KEY`를 설정하세요. 로컬 개발 서버는 기본으로 `http://localhost:8787`의 MyCode 모의 서버에서 조회합니다. GitHub Pages 빌드에는 `VITE_VUE_ANSWER_API_URL`로 MyCode와 같은 HTTPS 주소를 지정하세요. Supabase Edge Function을 사용할 때는 `https://<project>.supabase.co/functions/v1/vue-answers`처럼 함수까지 포함한 전체 URL을 사용합니다.
+
+Vue Guide에서 직접 Google 로그인하는 경우, Supabase의 Redirect URLs에 실제 앱 기본 주소를 등록하세요. 예를 들어 로컬은 `http://127.0.0.1:4000/`, GitHub Pages는 `https://parkjise.github.io/vue-guide/`입니다. 목록은 로그인 세션으로 답변 API를 조회하며, 열려 있는 동안 10초마다 갱신합니다. 로컬 모의 서버는 서버 메모리에 답변을 보관합니다. 배포용 모의 함수는 로그인한 사용자의 답변을 Supabase에 보관합니다.
 
 ## Composition API / Options API 소스 비교
 
