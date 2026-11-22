@@ -9,7 +9,7 @@ import { codeQaAuth, deleteCodeAnswers, listCodeAnswers } from '@/lib/codeQa';
 import { renderCodeAnswer } from '@/lib/codeQaMarkdown';
 
 const route = useRoute();
-const { copy } = useClipboard();
+const { copy } = useClipboard({ notifyOnFailure: false });
 const { toast } = useToast();
 const dateFormat = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' });
 const session = shallowRef(null);
@@ -17,6 +17,9 @@ const items = ref([]);
 const selectedId = ref('');
 const selected = computed(() => items.value.find((item) => item.id === selectedId.value));
 const answer = computed(() => renderCodeAnswer(selected.value?.answerMarkdown || ''));
+const copyOpen = ref(false);
+const manualCopy = shallowRef(null);
+const copyField = ref(null);
 const deleteOpen = ref(false);
 const checkedIds = ref(new Set());
 const pendingDeleteIds = ref([]);
@@ -42,6 +45,8 @@ onMounted(() => {
       request?.abort();
       items.value = [];
       selectedId.value = '';
+      copyOpen.value = false;
+      manualCopy.value = null;
       deleteOpen.value = false;
       checkedIds.value.clear();
       pendingDeleteIds.value = [];
@@ -96,11 +101,27 @@ async function refreshAnswers() {
   }
 }
 
-function copyAnswerCode(event) {
-  const button = event.target.closest('button[data-code-copy]');
+async function copyAnswerCode(event) {
+  const button = event.target?.closest?.('button[data-code-copy]');
   if (!button) return;
   const block = answer.value.codeBlocks[Number(button.dataset.codeCopy)];
-  if (block) void copy(block.text, block.label);
+  const userId = session.value?.user.id;
+  if (
+    block &&
+    userId &&
+    !(await copy(block.text, block.label)) &&
+    session.value?.user.id === userId
+  ) {
+    manualCopy.value = block;
+    copyOpen.value = true;
+  }
+}
+
+function selectManualCode() {
+  const field = copyField.value;
+  if (!field) return;
+  field.focus({ preventScroll: true });
+  field.setSelectionRange(0, field.value.length);
 }
 
 function toggleChecked(id, checked) {
@@ -251,6 +272,24 @@ async function signOut() {
       </article>
     </div>
 
+    <BaseModal v-model="copyOpen" title="코드 복사">
+      <p>자동 복사를 사용할 수 없어요. 코드를 전체 선택한 뒤 복사해 주세요.</p>
+      <label for="code-qa-manual-copy">{{ manualCopy?.label }}</label>
+      <textarea
+        id="code-qa-manual-copy"
+        ref="copyField"
+        class="code-qa__copy-field"
+        :value="manualCopy?.text"
+        readonly
+        spellcheck="false"
+        wrap="off"
+      />
+      <div class="code-qa__dialog-actions">
+        <BaseButton variant="outline" @click="copyOpen = false">닫기</BaseButton>
+        <BaseButton @click="selectManualCode">전체 선택</BaseButton>
+      </div>
+    </BaseModal>
+
     <BaseModal v-model="deleteOpen" title="선택한 답변을 삭제할까요?">
       <p>
         <strong>답변 {{ pendingDeleteIds.length }}개</strong>
@@ -378,6 +417,21 @@ async function signOut() {
   &__section h2 {
     font-size: 18px;
   }
+  &__copy-field {
+    width: 100%;
+    min-height: 180px;
+    max-height: 45vh;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font:
+      16px/1.5 Consolas,
+      monospace;
+    resize: vertical;
+    user-select: text;
+  }
   &__dialog-actions {
     display: flex;
     justify-content: flex-end;
@@ -442,6 +496,14 @@ async function signOut() {
   &__markdown :deep(a) {
     color: var(--primary);
     text-decoration: underline;
+  }
+
+  @media (pointer: coarse) {
+    &__markdown :deep(.code-qa__code-toolbar button) {
+      min-height: 44px;
+      padding-inline: 14px;
+      touch-action: manipulation;
+    }
   }
 
   @media (max-width: 760px) {
