@@ -1,1 +1,0 @@
-import{T as s}from"./TaskList-BD22Zey8.js";import{_ as t,o as e,a,d as o}from"./index-BFq_CnuP.js";const c={class:"demo"},_={__name:"tasks",setup(r){return(n,p)=>(e(),a("section",c,[o(s,{title:"팀 태스크"})]))}},i=t(_,[["__scopeId","data-v-26b12f1e"]]);export{i as default};
