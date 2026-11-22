@@ -1,8 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { JSDOM } from 'jsdom';
 import { renderCodeAnswer } from '../src/lib/codeQaMarkdown.js';
-import { createCodeQaPreview } from '../src/lib/codeQaPreview.js';
 
 test('Code Q&A renders separately named and highlighted code blocks with raw copy text', () => {
   const answer = renderCodeAnswer(
@@ -34,30 +32,43 @@ test('Code Q&A escapes untrusted file labels and keeps older indented code copya
   assert.equal(answer.codeBlocks[1].text, 'older code\n');
 });
 
-test('Code Q&A keeps the visual preview separate from file sources and removes active markup', () => {
+test('Code Q&A shows changed code separately from the complete component and stylesheet', () => {
   const answer = renderCodeAnswer(
     [
       '수정 설명',
+      '',
       '```html preview',
-      '<style>.sample { color: blue }</style><div class="sample" onclick="bad()">샘플 UI</div>',
-      '<a href="https://example.test">링크</a><iframe src="https://example.test"></iframe>',
-      '<script>bad()</script><meta http-equiv="refresh" content="0;url=https://example.test">',
+      '<div>기존 미리보기</div>',
       '```',
-      '```vue App.vue',
-      '<template><div>샘플 UI</div></template>',
+      '',
+      '```vue changes:src/App.vue',
+      '<button class="sample">수정</button>',
+      '```',
+      '',
+      '```css changes:src/style.css',
+      '.sample { color: blue; }',
+      '```',
+      '',
+      '```vue src/App.vue',
+      '<template><button class="sample">수정</button></template>',
+      '<style scoped src="./style.css"></style>',
+      '```',
+      '',
+      '```css src/style.css',
+      '.sample { color: blue; padding: 12px; }',
       '```'
     ].join('\n')
   );
   assert.match(answer.html, /수정 설명/);
-  assert.doesNotMatch(answer.html, /코드 복사|샘플 UI/);
-  assert.match(answer.sourcesHtml, /App.vue 코드 복사/);
-  assert.equal(answer.codeBlocks.length, 1);
-  const dom = new JSDOM('');
-  const preview = createCodeQaPreview(answer.previewHtml, dom.window.document);
-  assert.match(preview, /default-src 'none'/);
-  assert.match(preview, /class="sample">샘플 UI/);
-  assert.match(preview, /<style>\.sample/);
-  assert.doesNotMatch(preview, /onclick|example.test|<script|<iframe|http-equiv="refresh"/);
-  assert.equal(createCodeQaPreview('', dom.window.document), '');
-  dom.window.close();
+  assert.doesNotMatch(answer.html, /기존 미리보기|코드 복사/);
+  assert.match(answer.changesHtml, /src\/App\.vue 수정 코드 복사/);
+  assert.match(answer.changesHtml, /src\/style\.css 수정 코드 복사/);
+  assert.doesNotMatch(answer.changesHtml, /padding/);
+  assert.match(answer.sourcesHtml, /src\/style\.css 코드 복사/);
+  assert.match(answer.sourcesHtml, /padding/);
+  assert.deepEqual(
+    answer.codeBlocks.map(({ label }) => label),
+    ['src/App.vue', 'src/style.css', 'src/App.vue', 'src/style.css']
+  );
+  assert.equal(answer.codeBlocks[1].text, '.sample { color: blue; }\n');
 });
