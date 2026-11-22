@@ -36,6 +36,7 @@ test('Code Q&A shows changed code separately from the complete component and sty
   const answer = renderCodeAnswer(
     [
       '수정 설명',
+      '## 수정 코드',
       '',
       '```html preview',
       '<div>기존 미리보기</div>',
@@ -49,6 +50,7 @@ test('Code Q&A shows changed code separately from the complete component and sty
       '.sample { color: blue; }',
       '```',
       '',
+      '## 파일별 전체 소스',
       '```vue src/App.vue',
       '<template><button class="sample">수정</button></template>',
       '<style scoped src="./style.css"></style>',
@@ -60,7 +62,7 @@ test('Code Q&A shows changed code separately from the complete component and sty
     ].join('\n')
   );
   assert.match(answer.html, /수정 설명/);
-  assert.doesNotMatch(answer.html, /기존 미리보기|코드 복사/);
+  assert.doesNotMatch(answer.html, /기존 미리보기|코드 복사|<h2>/);
   assert.match(answer.changesHtml, /src\/App\.vue 수정 코드 복사/);
   assert.match(answer.changesHtml, /src\/style\.css 수정 코드 복사/);
   assert.doesNotMatch(answer.changesHtml, /padding/);

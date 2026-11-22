@@ -30,7 +30,15 @@ markdown.renderer.rules.code_block = codeBlock;
 
 export function renderCodeAnswer(source) {
   const env = { codeBlocks: [], sourceBlocks: [], changeBlocks: [] };
-  const html = markdown.render(source, env);
+  const html = markdown
+    .render(source, env)
+    .replace(
+      /<h([1-6])>(수정 코드|전체 소스|파일별 전체 소스)<\/h\1>\n/g,
+      (heading, _level, title) => {
+        const section = title === '수정 코드' ? env.changeBlocks : env.sourceBlocks;
+        return section.length ? '' : heading;
+      }
+    );
   return {
     html,
     sourcesHtml: env.sourceBlocks.join(''),
