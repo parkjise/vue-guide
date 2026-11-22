@@ -1,0 +1,1 @@
+import{P as o}from"./PeopleDirectory-BeU_Aw9q.js";import{_ as t,o as e,a as c,d as s}from"./index-C2W5RbX9.js";import"./BaseModal-BWg2RUCY.js";const a={class:"demo"},r={__name:"contacts",setup(_){return(n,p)=>(e(),c("section",a,[s(o,{mode:"contacts"})]))}},f=t(r,[["__scopeId","data-v-bfc64394"]]);export{f as default};
