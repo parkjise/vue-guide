@@ -29,11 +29,12 @@ function validateApiUrl(value) {
   return null;
 }
 
-async function requestCodeAnswers(accessToken, { method, id, signal } = {}) {
+async function requestCodeAnswers(accessToken, { method, body, signal } = {}) {
   const headers = { Authorization: `Bearer ${accessToken}` };
   if (new URL(apiUrl).origin === new URL(projectUrl).origin) headers.apikey = publicKey;
-  const url = id ? `${apiUrl}/${encodeURIComponent(id)}` : apiUrl;
-  const response = await fetch(url, {
+  if (body) headers['Content-Type'] = 'application/json';
+  const response = await fetch(apiUrl, {
+    body: body ? JSON.stringify(body) : undefined,
     method,
     headers,
     cache: 'no-store',
@@ -52,10 +53,10 @@ export async function listCodeAnswers(accessToken, signal) {
   return [...items].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 }
 
-export async function deleteCodeAnswer(accessToken, id) {
+export async function deleteCodeAnswers(accessToken, ids) {
   const response = await requestCodeAnswers(accessToken, {
     method: 'DELETE',
-    id,
+    body: { ids },
     signal: AbortSignal.timeout(10000)
   });
   if (!response.ok) throw new Error('답변을 삭제하지 못했습니다. 다시 시도해 주세요.');

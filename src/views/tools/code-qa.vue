@@ -5,7 +5,7 @@ import BaseButton from '@/components/common/BaseButton.vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 import { useClipboard } from '@/composables/useClipboard';
 import { useToast } from '@/composables/useToast';
-import { codeQaAuth, deleteCodeAnswer, listCodeAnswers } from '@/lib/codeQa';
+import { codeQaAuth, deleteCodeAnswers, listCodeAnswers } from '@/lib/codeQa';
 import { renderCodeAnswer } from '@/lib/codeQaMarkdown';
 import { createCodeQaPreview } from '@/lib/codeQaPreview';
 
@@ -20,7 +20,8 @@ const selected = computed(() => items.value.find((item) => item.id === selectedI
 const answer = computed(() => renderCodeAnswer(selected.value?.answerMarkdown || ''));
 const preview = computed(() => createCodeQaPreview(answer.value.previewHtml));
 const deleteOpen = ref(false);
-const deleteTarget = shallowRef(null);
+const checkedIds = ref(new Set());
+const pendingDeleteIds = ref([]);
 const deleting = ref(false);
 const deleteError = ref('');
 const ready = ref(!codeQaAuth);
@@ -44,7 +45,8 @@ onMounted(() => {
       items.value = [];
       selectedId.value = '';
       deleteOpen.value = false;
-      deleteTarget.value = null;
+      checkedIds.value.clear();
+      pendingDeleteIds.value = [];
       loading.value = false;
       error.value = '';
       if (nextUser) void refreshAnswers();
@@ -75,6 +77,9 @@ async function refreshAnswers() {
     const answers = await listCodeAnswers(session.value.access_token, signal);
     if (controller.signal.aborted) return;
     items.value = answers;
+    checkedIds.value = new Set(
+      answers.filter(({ id }) => checkedIds.value.has(id)).map(({ id }) => id)
+    );
     if (!answers.some((item) => item.id === selectedId.value)) {
       selectedId.value = answers[0]?.id ?? '';
     }
@@ -82,6 +87,7 @@ async function refreshAnswers() {
     if (!controller.signal.aborted) {
       items.value = [];
       selectedId.value = '';
+      checkedIds.value.clear();
       error.value =
         cause instanceof Error && cause.name === 'Error'
           ? cause.message
@@ -99,29 +105,36 @@ function copyAnswerCode(event) {
   if (block) void copy(block.text, block.label);
 }
 
+function toggleChecked(id, checked) {
+  if (checked) checkedIds.value.add(id);
+  else checkedIds.value.delete(id);
+}
+
 function confirmDelete() {
-  deleteTarget.value = selected.value;
+  pendingDeleteIds.value = [...checkedIds.value];
   deleteError.value = '';
   deleteOpen.value = true;
 }
 
-async function removeAnswer() {
+async function removeAnswers() {
   const activeSession = session.value;
-  const item = deleteTarget.value;
-  if (!activeSession || !item || deleting.value) return;
+  const ids = pendingDeleteIds.value;
+  if (!activeSession || !ids.length || deleting.value) return;
   deleting.value = true;
   deleteError.value = '';
   request?.abort();
   try {
-    await deleteCodeAnswer(activeSession.access_token, item.id);
+    await deleteCodeAnswers(activeSession.access_token, ids);
     if (session.value?.user.id !== activeSession.user.id) return;
-    const index = items.value.findIndex(({ id }) => id === item.id);
-    items.value = items.value.filter(({ id }) => id !== item.id);
-    if (selectedId.value === item.id) {
+    const deleted = new Set(ids);
+    const index = items.value.findIndex(({ id }) => id === selectedId.value);
+    items.value = items.value.filter(({ id }) => !deleted.has(id));
+    ids.forEach((id) => checkedIds.value.delete(id));
+    if (deleted.has(selectedId.value)) {
       selectedId.value = (items.value[index] || items.value.at(-1))?.id ?? '';
     }
     deleteOpen.value = false;
-    toast('답변을 삭제했습니다.');
+    toast(`답변 ${ids.length}개를 삭제했습니다.`);
   } catch (cause) {
     deleteError.value =
       cause?.name === 'Error' ? cause.message : '답변을 삭제하지 못했습니다. 다시 시도해 주세요.';
@@ -167,8 +180,18 @@ async function signOut() {
         </p>
       </div>
       <div v-if="session" class="code-qa__actions">
-        <button type="button" :disabled="loading" @click="refreshAnswers">새로고침</button>
-        <button type="button" @click="signOut">로그아웃</button>
+        <button type="button" :disabled="loading || deleting" @click="refreshAnswers">
+          새로고침
+        </button>
+        <button
+          type="button"
+          class="code-qa__delete"
+          :disabled="!checkedIds.size || deleting"
+          @click="confirmDelete"
+        >
+          답변 삭제{{ checkedIds.size ? ` (${checkedIds.size})` : '' }}
+        </button>
+        <button type="button" :disabled="deleting" @click="signOut">로그아웃</button>
       </div>
     </header>
 
@@ -186,7 +209,15 @@ async function signOut() {
 
     <div v-if="items.length" class="code-qa__results">
       <ul class="code-qa__panel code-qa__list" aria-label="답변 목록">
-        <li v-for="item in items" :key="item.id">
+        <li v-for="item in items" :key="item.id" class="code-qa__row">
+          <input
+            type="checkbox"
+            class="code-qa__checkbox"
+            :checked="checkedIds.has(item.id)"
+            :disabled="deleting"
+            :aria-label="`${item.title}, ${dateFormat.format(new Date(item.createdAt))} 삭제 대상으로 선택`"
+            @change="toggleChecked(item.id, $event.target.checked)"
+          />
           <button
             type="button"
             :aria-pressed="item.id === selectedId"
@@ -201,11 +232,6 @@ async function signOut() {
         </li>
       </ul>
       <article v-if="selected" class="code-qa__panel code-qa__answer" :aria-label="selected.title">
-        <div class="code-qa__answer-actions">
-          <button type="button" class="code-qa__delete" :disabled="deleting" @click="confirmDelete">
-            선택한 답변 삭제
-          </button>
-        </div>
         <!-- MarkdownIt escapes HTML, and remote images are disabled. -->
         <div class="code-qa__markdown" @click="copyAnswerCode" v-html="answer.html" />
         <section v-if="preview" class="code-qa__section" aria-labelledby="code-qa-preview">
@@ -232,15 +258,15 @@ async function signOut() {
 
     <BaseModal v-model="deleteOpen" title="선택한 답변을 삭제할까요?">
       <p>
-        <strong>{{ deleteTarget?.title }}</strong>
-        답변을 삭제하면 복구할 수 없습니다.
+        <strong>답변 {{ pendingDeleteIds.length }}개</strong>
+        를 삭제합니다. 삭제한 답변은 복구할 수 없습니다.
       </p>
       <p v-if="deleteError" class="code-qa__error" role="alert">{{ deleteError }}</p>
       <div class="code-qa__dialog-actions">
         <BaseButton variant="outline" :disabled="deleting" @click="deleteOpen = false">
           취소
         </BaseButton>
-        <BaseButton variant="danger" :loading="deleting" @click="removeAnswer">삭제</BaseButton>
+        <BaseButton variant="danger" :loading="deleting" @click="removeAnswers">삭제</BaseButton>
       </div>
     </BaseModal>
   </section>
@@ -316,6 +342,22 @@ async function signOut() {
     display: grid;
     gap: 8px;
   }
+  &__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+  }
+  &__checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+  &__checkbox:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
   &__list button {
     display: grid;
     gap: 4px;
@@ -353,14 +395,10 @@ async function signOut() {
     border-radius: 9px;
     background: #fff;
   }
-  &__answer-actions,
   &__dialog-actions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-  }
-  &__answer-actions {
-    margin-bottom: 12px;
   }
   button.code-qa__delete {
     color: var(--danger, #b42318);
