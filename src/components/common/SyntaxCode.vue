@@ -13,6 +13,7 @@ const highlighted = computed(() => highlightCode(props.code, props.language));
 </template>
 <style lang="scss" scoped>
 @use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/code-palette' as *;
 .syntax-code {
   @include custom-scrollbar;
   @include focus-ring;
@@ -41,68 +42,8 @@ const highlighted = computed(() => highlightCode(props.code, props.language));
   :deep(::selection) {
     background: #264f78;
   }
-  :deep(.hljs-comment),
-  :deep(.hljs-quote) {
-    color: #6a9955;
-  }
-  :deep(.hljs-keyword),
-  :deep(.hljs-selector-tag),
-  :deep(.hljs-literal) {
-    color: #569cd6;
-  }
-  :deep(.hljs-tag) {
-    color: #808080;
-  }
-  :deep(.hljs-name) {
-    color: #569cd6;
-  }
-  :deep(.hljs-attr),
-  :deep(.hljs-attribute),
-  :deep(.hljs-variable),
-  :deep(.hljs-property),
-  :deep(.hljs-params) {
-    color: #9cdcfe;
-  }
-  :deep(.hljs-string),
-  :deep(.hljs-regexp),
-  :deep(.hljs-template-tag),
-  :deep(.hljs-template-variable) {
-    color: #ce9178;
-  }
-  :deep(.hljs-number),
-  :deep(.hljs-symbol),
-  :deep(.hljs-bullet) {
-    color: #b5cea8;
-  }
-  :deep(.hljs-title),
-  :deep(.hljs-built_in),
-  :deep(.hljs-function) {
-    color: #dcdcaa;
-  }
-  :deep(.hljs-title.class_),
-  :deep(.hljs-type) {
-    color: #4ec9b0;
-  }
-  :deep(.hljs-selector-class),
-  :deep(.hljs-selector-id),
-  :deep(.hljs-selector-pseudo) {
-    color: #d7ba7d;
-  }
-  :deep(.hljs-meta),
-  :deep(.hljs-doctag) {
-    color: #c586c0;
-  }
-  :deep(.hljs-operator),
-  :deep(.hljs-punctuation) {
-    color: #d4d4d4;
-  }
-  :deep(.hljs-addition) {
-    color: #b5cea8;
-    background: #283b26;
-  }
-  :deep(.hljs-deletion) {
-    color: #ce9178;
-    background: #482c2c;
+  :deep(code) {
+    @include vs-code-dark-tokens;
   }
   @include responsive(mobile) {
     padding: 16px;

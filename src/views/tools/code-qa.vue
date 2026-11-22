@@ -1,17 +1,26 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import { useRoute } from 'vue-router';
-import MarkdownIt from 'markdown-it';
-import { codeQaAuth, listCodeAnswers } from '@/lib/codeQa';
+import BaseButton from '@/components/common/BaseButton.vue';
+import BaseModal from '@/components/common/BaseModal.vue';
+import { useClipboard } from '@/composables/useClipboard';
+import { useToast } from '@/composables/useToast';
+import { codeQaAuth, deleteCodeAnswer, listCodeAnswers } from '@/lib/codeQa';
+import { renderCodeAnswer } from '@/lib/codeQaMarkdown';
 
 const route = useRoute();
-const markdown = new MarkdownIt({ html: false, linkify: false }).disable('image');
+const { copy } = useClipboard();
+const { toast } = useToast();
 const dateFormat = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'short' });
 const session = shallowRef(null);
 const items = ref([]);
 const selectedId = ref('');
 const selected = computed(() => items.value.find((item) => item.id === selectedId.value));
-const answerHtml = computed(() => markdown.render(selected.value?.answerMarkdown || ''));
+const answer = computed(() => renderCodeAnswer(selected.value?.answerMarkdown || ''));
+const deleteOpen = ref(false);
+const deleteTarget = shallowRef(null);
+const deleting = ref(false);
+const deleteError = ref('');
 const ready = ref(!codeQaAuth);
 const loading = ref(false);
 const error = ref(
@@ -32,6 +41,8 @@ onMounted(() => {
       request?.abort();
       items.value = [];
       selectedId.value = '';
+      deleteOpen.value = false;
+      deleteTarget.value = null;
       loading.value = false;
       error.value = '';
       if (nextUser) void refreshAnswers();
@@ -51,7 +62,7 @@ onUnmounted(() => {
 });
 
 async function refreshAnswers() {
-  if (!session.value) return;
+  if (!session.value || deleting.value) return;
   request?.abort();
   const controller = new AbortController();
   request = controller;
@@ -76,6 +87,44 @@ async function refreshAnswers() {
     }
   } finally {
     if (request === controller) loading.value = false;
+  }
+}
+
+function copyAnswerCode(event) {
+  const button = event.target.closest('button[data-code-copy]');
+  if (!button) return;
+  const block = answer.value.codeBlocks[Number(button.dataset.codeCopy)];
+  if (block) void copy(block.text, block.label);
+}
+
+function confirmDelete() {
+  deleteTarget.value = selected.value;
+  deleteError.value = '';
+  deleteOpen.value = true;
+}
+
+async function removeAnswer() {
+  const activeSession = session.value;
+  const item = deleteTarget.value;
+  if (!activeSession || !item || deleting.value) return;
+  deleting.value = true;
+  deleteError.value = '';
+  request?.abort();
+  try {
+    await deleteCodeAnswer(activeSession.access_token, item.id);
+    if (session.value?.user.id !== activeSession.user.id) return;
+    const index = items.value.findIndex(({ id }) => id === item.id);
+    items.value = items.value.filter(({ id }) => id !== item.id);
+    if (selectedId.value === item.id) {
+      selectedId.value = (items.value[index] || items.value.at(-1))?.id ?? '';
+    }
+    deleteOpen.value = false;
+    toast('답변을 삭제했습니다.');
+  } catch (cause) {
+    deleteError.value =
+      cause?.name === 'Error' ? cause.message : '답변을 삭제하지 못했습니다. 다시 시도해 주세요.';
+  } finally {
+    deleting.value = false;
   }
 }
 
@@ -150,14 +199,35 @@ async function signOut() {
         </li>
       </ul>
       <article v-if="selected" class="code-qa__panel code-qa__answer" :aria-label="selected.title">
+        <div class="code-qa__answer-actions">
+          <button type="button" class="code-qa__delete" :disabled="deleting" @click="confirmDelete">
+            선택한 답변 삭제
+          </button>
+        </div>
         <!-- MarkdownIt escapes HTML, and remote images are disabled. -->
-        <div class="code-qa__markdown" v-html="answerHtml" />
+        <div class="code-qa__markdown" @click="copyAnswerCode" v-html="answer.html" />
       </article>
     </div>
+
+    <BaseModal v-model="deleteOpen" title="선택한 답변을 삭제할까요?">
+      <p>
+        <strong>{{ deleteTarget?.title }}</strong>
+        답변을 삭제하면 복구할 수 없습니다.
+      </p>
+      <p v-if="deleteError" class="code-qa__error" role="alert">{{ deleteError }}</p>
+      <div class="code-qa__dialog-actions">
+        <BaseButton variant="outline" :disabled="deleting" @click="deleteOpen = false">
+          취소
+        </BaseButton>
+        <BaseButton variant="danger" :loading="deleting" @click="removeAnswer">삭제</BaseButton>
+      </div>
+    </BaseModal>
   </section>
 </template>
 
 <style lang="scss" scoped>
+@use '@/assets/styles/code-palette' as *;
+
 .code-qa {
   display: grid;
   gap: 16px;
@@ -242,11 +312,67 @@ async function signOut() {
   &__answer {
     overflow-wrap: anywhere;
   }
-  &__markdown :deep(pre) {
+  &__answer-actions,
+  &__dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  &__answer-actions {
+    margin-bottom: 12px;
+  }
+  button.code-qa__delete {
+    color: var(--danger, #b42318);
+  }
+  &__markdown :deep(.code-qa__code-block) {
+    margin: 12px 0 18px;
+    border: 1px solid #454545;
+    border-radius: 9px;
+    overflow: hidden;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    @include vs-code-dark-tokens;
+  }
+  &__markdown :deep(.code-qa__code-toolbar) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px 6px 14px;
+    background: #252526;
+    color: #e0e0e0;
+    font-size: 12px;
+  }
+  &__markdown :deep(.code-qa__code-toolbar button) {
+    flex: none;
+    padding: 4px 10px;
+    border: 1px solid #565656;
+    border-radius: 5px;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+  }
+  &__dialog-actions :deep(.base-button--danger) {
+    color: #fff;
+    background: var(--danger, #b42318);
+    border-color: transparent;
+  }
+  &__markdown :deep(.code-qa__code-toolbar button:focus-visible),
+  &__markdown :deep(.code-qa__code:focus-visible) {
+    outline: 2px solid #569cd6;
+    outline-offset: -2px;
+  }
+  &__markdown :deep(.code-qa__code) {
     overflow: auto;
-    padding: 12px;
-    border-radius: 8px;
-    background: var(--soft);
+    margin: 0;
+    max-height: 600px;
+    padding: 14px;
+    color-scheme: dark;
+    tab-size: 2;
+    font:
+      13px/1.7 Consolas,
+      'SFMono-Regular',
+      monospace;
   }
   &__markdown :deep(code) {
     font-family: monospace;

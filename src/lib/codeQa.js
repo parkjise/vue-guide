@@ -29,10 +29,12 @@ function validateApiUrl(value) {
   return null;
 }
 
-export async function listCodeAnswers(accessToken, signal) {
+async function requestCodeAnswers(accessToken, { method, id, signal } = {}) {
   const headers = { Authorization: `Bearer ${accessToken}` };
   if (new URL(apiUrl).origin === new URL(projectUrl).origin) headers.apikey = publicKey;
-  const response = await fetch(apiUrl, {
+  const url = id ? `${apiUrl}/${encodeURIComponent(id)}` : apiUrl;
+  const response = await fetch(url, {
+    method,
     headers,
     cache: 'no-store',
     redirect: 'error',
@@ -40,7 +42,21 @@ export async function listCodeAnswers(accessToken, signal) {
   });
   if (response.status === 401)
     throw new Error('로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.');
+  return response;
+}
+
+export async function listCodeAnswers(accessToken, signal) {
+  const response = await requestCodeAnswers(accessToken, { signal });
   if (!response.ok) throw new Error('답변을 불러오지 못했습니다. 다시 시도해 주세요.');
   const { items } = await response.json();
   return [...items].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+}
+
+export async function deleteCodeAnswer(accessToken, id) {
+  const response = await requestCodeAnswers(accessToken, {
+    method: 'DELETE',
+    id,
+    signal: AbortSignal.timeout(10000)
+  });
+  if (!response.ok) throw new Error('답변을 삭제하지 못했습니다. 다시 시도해 주세요.');
 }
