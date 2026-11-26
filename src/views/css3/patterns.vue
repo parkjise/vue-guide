@@ -1,11 +1,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { Copy, Check, Download, Palette } from 'lucide-vue-next';
 import patternConfigs from '@/data/css3Patterns.json';
 import tipConfigs from '@/data/css3Tips.json';
 import recipes from '@/data/scssRecipes.json';
 import themeVariables from '@/assets/styles/_variables.scss?raw';
 import SyntaxCode from '@/components/common/SyntaxCode.vue';
+import LayoutTutorial from '@/components/examples/LayoutTutorial.vue';
 import { useClipboard } from '@/composables/useClipboard';
 import { useTheme } from '@/composables/useTheme';
 import { createPracticePreview } from '@/composables/practicePreview';
@@ -18,6 +20,9 @@ import {
 } from '@/composables/cssPatternOutput';
 const patterns = resolveCssPatterns(patternConfigs, recipes);
 const tips = resolveCssTips(tipConfigs, patterns);
+const route = useRoute();
+const router = useRouter();
+const layoutLesson = computed(() => route.query.lesson === 'flex-grid');
 const mode = ref('patterns');
 const activeIds = ref({ patterns: patterns[0].id, tips: tips[0].id });
 const category = ref('전체');
@@ -80,6 +85,12 @@ watch(mode, () => {
   codeTab.value = 'css';
   copied.value = false;
 });
+function openGuide(nextMode) {
+  mode.value = nextMode;
+  if (layoutLesson.value) {
+    router.push({ query: { ...route.query, lesson: undefined } });
+  }
+}
 function select(id) {
   activeIds.value[mode.value] = id;
   codeTab.value = 'css';
@@ -114,14 +125,30 @@ function download(format) {
       </p>
     </header>
     <nav class="css-guide__modes" aria-label="CSS3 가이드 종류">
-      <button type="button" :aria-pressed="mode === 'patterns'" @click="mode = 'patterns'">
+      <button
+        type="button"
+        :aria-pressed="!layoutLesson && mode === 'patterns'"
+        @click="openGuide('patterns')"
+      >
         CSS3 패턴 · {{ patterns.length }}
       </button>
-      <button type="button" :aria-pressed="mode === 'tips'" @click="mode = 'tips'">
+      <button
+        type="button"
+        :aria-pressed="!layoutLesson && mode === 'tips'"
+        @click="openGuide('tips')"
+      >
         실무 팁 · {{ tips.length }}
       </button>
+      <RouterLink
+        :to="{ query: { ...route.query, lesson: 'flex-grid' } }"
+        :data-current="layoutLesson"
+        :aria-current-value="layoutLesson ? 'page' : 'false'"
+      >
+        Flex · Grid 실습
+      </RouterLink>
     </nav>
-    <section class="css-guide__picker" aria-label="CSS 패턴과 팁 선택">
+    <LayoutTutorial v-if="layoutLesson" />
+    <section v-show="!layoutLesson" class="css-guide__picker" aria-label="CSS 패턴과 팁 선택">
       <div class="css-guide__filters">
         <label>
           CSS 검색
@@ -168,7 +195,12 @@ function download(format) {
         </button>
       </footer>
     </section>
-    <section ref="resultPanel" class="css-guide__result" aria-label="선택한 CSS3 소스">
+    <section
+      v-show="!layoutLesson"
+      ref="resultPanel"
+      class="css-guide__result"
+      aria-label="선택한 CSS3 소스"
+    >
       <header class="css-guide__heading">
         <div>
           <span class="css-guide__eyebrow">{{ active.category }}</span>
@@ -285,7 +317,7 @@ function download(format) {
         HTML의 id와 클래스는 프로젝트에 맞게 바꿔 적용하세요.
       </p>
     </section>
-    <footer class="css-guide__references">
+    <footer v-show="!layoutLesson" class="css-guide__references">
       <span>참고 문서:</span>
       <a
         href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference"
@@ -347,14 +379,23 @@ function download(format) {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    button {
+    button,
+    a {
       padding: 12px 18px;
       font-size: 13px;
       font-weight: 600;
-      &[aria-pressed='true'] {
+      &[aria-pressed='true'],
+      &[data-current='true'] {
         background: var(--primary);
         color: white;
       }
+    }
+    a {
+      @include focus-ring;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
     }
   }
   &__downloads {
